@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const PlayTashApp());
@@ -387,25 +388,62 @@ class PrivacyPage extends StatefulWidget {
 }
 
 class _PrivacyPageState extends State<PrivacyPage> {
-  bool doNotFollowMe = false;
+    bool doNotFollowMe = false;
   bool doNotDisturb = false;
   bool doNotRequest = false;
   bool profileVisitor = true;
   bool onlineStatus = true;
 
-  Widget privacyOption({
+  @override
+  void initState() {
+    super.initState();
+    _loadPrivacySettings();
+  }
+
+  Future<void> _loadPrivacySettings() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    if (!mounted) return;
+
+    setState(() {
+      doNotFollowMe = prefs.getBool('doNotFollowMe') ?? false;
+      doNotDisturb = prefs.getBool('doNotDisturb') ?? false;
+      doNotRequest = prefs.getBool('doNotRequest') ?? false;
+      profileVisitor = prefs.getBool('profileVisitor') ?? true;
+      onlineStatus = prefs.getBool('onlineStatus') ?? true;
+    });
+  }
+
+  Future<void> _savePrivacySetting(
+    String key,
+    bool value,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
+    Widget privacyOption({
     required String title,
     required String description,
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: gold, width: 1.3),
-        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: gold,
+          width: 1.2,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -418,27 +456,89 @@ class _PrivacyPageState extends State<PrivacyPage> {
                   style: const TextStyle(
                     color: Colors.black,
                     fontSize: 15,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 6),
                 Text(
                   description,
                   style: const TextStyle(
                     color: Colors.black54,
                     fontSize: 12,
+                    height: 1.4,
                   ),
                 ),
               ],
             ),
           ),
-          Switch(
-            value: value,
-            activeThumbColor: Colors.green,
-            activeTrackColor: Colors.green.shade200,
-            inactiveThumbColor: Colors.red,
-            inactiveTrackColor: Colors.red.shade100,
-            onChanged: onChanged,
+          const SizedBox(width: 10),
+          GestureDetector(
+            onTap: () => onChanged(!value),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 88,
+              height: 36,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 5,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                color: value
+                    ? Colors.green.shade600
+                    : Colors.red.shade600,
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: Row(
+                mainAxisAlignment: value
+                    ? MainAxisAlignment.end
+                    : MainAxisAlignment.start,
+                children: [
+                  if (!value) ...[
+                    const Expanded(
+                      child: Center(
+                        child: Text(
+                          'OFF',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      value ? Icons.check : Icons.close,
+                      size: 17,
+                      color: value
+                          ? Colors.green
+                          : Colors.red,
+                    ),
+                  ),
+                  if (value) ...[
+                    const Expanded(
+                      child: Center(
+                        child: Text(
+                          'ON',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -450,14 +550,28 @@ class _PrivacyPageState extends State<PrivacyPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          '🔒 Privacy',
-          style: TextStyle(color: Colors.black),
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
-      ),
+  backgroundColor: Colors.white,
+  elevation: 0,
+  leadingWidth: 64,
+  leading: IconButton(
+    icon: const Icon(
+      Icons.arrow_back,
+      size: 32,
+      color: Colors.black,
+    ),
+    onPressed: () {
+      Navigator.pop(context);
+    },
+  ),
+  title: const Text(
+    '🔒 Privacy',
+    style: TextStyle(
+      color: Colors.black,
+      fontSize: 22,
+      fontWeight: FontWeight.bold,
+    ),
+  ),
+),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -465,41 +579,56 @@ class _PrivacyPageState extends State<PrivacyPage> {
             title: 'Do Not Follow Me',
             description: 'Control whether friends can enter your room.',
             value: doNotFollowMe,
-            onChanged: (value) {
-              setState(() => doNotFollowMe = value);
-            },
+            onChanged: (value) async {
+  setState(() => doNotFollowMe = value);
+  await _savePrivacySetting('doNotFollowMe', value);
+},
           ),
+
+          
           privacyOption(
             title: 'Do Not Disturb',
             description: 'Control visibility of your game status.',
             value: doNotDisturb,
-            onChanged: (value) {
-              setState(() => doNotDisturb = value);
-            },
+            onChanged: (value) async {
+  setState(() => doNotDisturb = value);
+  await _savePrivacySetting('doNotDisturb', value);
+},
           ),
+
+          
           privacyOption(
             title: 'Do Not Request',
             description: 'Control whether others can send you requests.',
             value: doNotRequest,
-            onChanged: (value) {
-              setState(() => doNotRequest = value);
-            },
+            onChanged: (value) async {
+  setState(() => doNotRequest = value);
+  await _savePrivacySetting('doNotRequest', value);
+},
           ),
+
+          
           privacyOption(
             title: 'Profile Visitor',
             description: 'Allow others to open your profile.',
             value: profileVisitor,
-            onChanged: (value) {
-              setState(() => profileVisitor = value);
-            },
+            onChanged: (value) async {
+  setState(() => profileVisitor = value);
+  await _savePrivacySetting('profileVisitor', value);
+},
           ),
+
+
+
+          
           privacyOption(
             title: 'Online Status',
             description: 'Control the online indicator shown to friends.',
             value: onlineStatus,
-            onChanged: (value) {
-              setState(() => onlineStatus = value);
-            },
+            onChanged: (value) async {
+  setState(() => onlineStatus = value);
+  await _savePrivacySetting('onlineStatus', value);
+},
           ),
         ],
       ),
