@@ -420,6 +420,7 @@ class _PrivacyPageState extends State<PrivacyPage> {
   ) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
+    await prefs.reload();
   }
     Widget privacyOption({
     required String title,
