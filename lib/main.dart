@@ -356,8 +356,157 @@ class _MainPageState extends State<MainPage> {
           'Log Out',
           'Delete Account',
         ])
-          box(item, icon: Icons.settings_outlined),
+         box(
+  item,
+  icon: item == 'Privacy'
+      ? Icons.lock_outline
+      : Icons.settings_outlined,
+  onTap: item == 'Privacy'
+      ? () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const PrivacyPage(),
+            ),
+          );
+        }
+      : null,
+),
       ],
     );
   }
 }
+
+
+
+class PrivacyPage extends StatefulWidget {
+  const PrivacyPage({super.key});
+
+  @override
+  State<PrivacyPage> createState() => _PrivacyPageState();
+}
+
+class _PrivacyPageState extends State<PrivacyPage> {
+  bool doNotFollowMe = false;
+  bool doNotDisturb = false;
+  bool doNotRequest = false;
+  bool profileVisitor = true;
+  bool onlineStatus = true;
+
+  Widget privacyOption({
+    required String title,
+    required String description,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: gold, width: 1.3),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: value,
+            activeThumbColor: Colors.green,
+            activeTrackColor: Colors.green.shade200,
+            inactiveThumbColor: Colors.red,
+            inactiveTrackColor: Colors.red.shade100,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text(
+          '🔒 Privacy',
+          style: TextStyle(color: Colors.black),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          privacyOption(
+            title: 'Do Not Follow Me',
+            description: 'Control whether friends can enter your room.',
+            value: doNotFollowMe,
+            onChanged: (value) {
+              setState(() => doNotFollowMe = value);
+            },
+          ),
+          privacyOption(
+            title: 'Do Not Disturb',
+            description: 'Control visibility of your game status.',
+            value: doNotDisturb,
+            onChanged: (value) {
+              setState(() => doNotDisturb = value);
+            },
+          ),
+          privacyOption(
+            title: 'Do Not Request',
+            description: 'Control whether others can send you requests.',
+            value: doNotRequest,
+            onChanged: (value) {
+              setState(() => doNotRequest = value);
+            },
+          ),
+          privacyOption(
+            title: 'Profile Visitor',
+            description: 'Allow others to open your profile.',
+            value: profileVisitor,
+            onChanged: (value) {
+              setState(() => profileVisitor = value);
+            },
+          ),
+          privacyOption(
+            title: 'Online Status',
+            description: 'Control the online indicator shown to friends.',
+            value: onlineStatus,
+            onChanged: (value) {
+              setState(() => onlineStatus = value);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+
+
