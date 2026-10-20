@@ -749,3 +749,243 @@ class _PrivacyPageState extends State<PrivacyPage> {
     );
   }
 }
+
+
+
+class AccountPage extends StatelessWidget {
+  const AccountPage({super.key});
+
+  static const Color gold = Color(0xFFD4AF37);
+
+  void _showMessage(BuildContext context, String title) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$title ki functionality baad mein connect hogi.'),
+      ),
+    );
+  }
+
+  Widget _accountOption(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: gold, width: 1.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: gold, size: 27),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        trailing: const Icon(
+          Icons.arrow_forward_ios,
+          color: gold,
+          size: 16,
+        ),
+        onTap: onTap,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Account',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _accountOption(
+            context,
+            title: 'Change Email',
+            icon: Icons.email_outlined,
+            onTap: () => _showMessage(context, 'Change Email'),
+          ),
+          _accountOption(
+            context,
+            title: 'Change Phone Number',
+            icon: Icons.phone_android,
+            onTap: () => _showMessage(context, 'Change Phone Number'),
+          ),
+          _accountOption(
+            context,
+            title: 'Change Password',
+            icon: Icons.lock_outline,
+            onTap: () => _showMessage(context, 'Change Password'),
+          ),
+          _accountOption(
+            context,
+            title: 'Google Link',
+            icon: Icons.g_mobiledata,
+            onTap: () => _showMessage(context, 'Google Link'),
+          ),
+          _accountOption(
+            context,
+            title: 'Facebook Link',
+            icon: Icons.facebook,
+            onTap: () => _showMessage(context, 'Facebook Link'),
+          ),
+          _accountOption(
+            context,
+            title: 'Account Information',
+            icon: Icons.info_outline,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      const AccountInformationPage(),
+                ),
+              );
+            },
+          ),
+          _accountOption(
+            context,
+            title: 'Account Icon',
+            icon: Icons.account_circle_outlined,
+            onTap: () => _showMessage(context, 'Account Icon'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AccountInformationPage extends StatelessWidget {
+  const AccountInformationPage({super.key});
+
+  static const Color gold = Color(0xFFD4AF37);
+
+  Widget _informationRow({
+    required IconData icon,
+    required String title,
+    required String value,
+    String? subtitle,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: gold, width: 1.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: gold, size: 28),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontSize: 14,
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 5),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: Colors.black54,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Account Information',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _informationRow(
+            icon: Icons.email_outlined,
+            title: 'Gmail',
+            value: 'Not linked',
+          ),
+          _informationRow(
+            icon: Icons.lock_outline,
+            title: 'Password',
+            value: 'Hidden for security',
+          ),
+          _informationRow(
+            icon: Icons.person_outline,
+            title: 'User Name',
+            value: 'Not set',
+          ),
+          _informationRow(
+            icon: Icons.badge_outlined,
+            title: 'UID',
+            value: 'Not Assigned',
+            subtitle: 'Future mein 6-digit UID yahan show hoga.',
+          ),
+          _informationRow(
+            icon: Icons.phone_android,
+            title: 'Mobile Number',
+            value: 'Not linked',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
