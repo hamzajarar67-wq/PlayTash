@@ -415,13 +415,26 @@ class _PrivacyPageState extends State<PrivacyPage> {
   }
 
   Future<void> _savePrivacySetting(
-    String key,
-    bool value,
-  ) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(key, value);
-    await prefs.reload();
+  String key,
+  bool value,
+) async {
+  final prefs = await SharedPreferences.getInstance();
+
+  await prefs.setBool(key, value);
+
+  final checkPrefs = await SharedPreferences.getInstance();
+  final savedValue = checkPrefs.getBool(key);
+
+  if (savedValue != value && mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Privacy setting could not be saved. Please try again.',
+        ),
+      ),
+    );
   }
+    
     Widget privacyOption({
     required String title,
     required String description,
