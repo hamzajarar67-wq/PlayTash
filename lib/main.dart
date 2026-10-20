@@ -379,7 +379,6 @@ class _MainPageState extends State<MainPage> {
 }
 
 
-
 class PrivacyPage extends StatefulWidget {
   const PrivacyPage({super.key});
 
@@ -388,11 +387,13 @@ class PrivacyPage extends StatefulWidget {
 }
 
 class _PrivacyPageState extends State<PrivacyPage> {
-    bool doNotFollowMe = false;
+  bool doNotFollowMe = false;
   bool doNotDisturb = false;
   bool doNotRequest = false;
   bool profileVisitor = true;
   bool onlineStatus = true;
+
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -401,45 +402,146 @@ class _PrivacyPageState extends State<PrivacyPage> {
   }
 
   Future<void> _loadPrivacySettings() async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.reload();
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    setState(() {
-      doNotFollowMe = prefs.getBool('doNotFollowMe') ?? false;
-      doNotDisturb = prefs.getBool('doNotDisturb') ?? false;
-      doNotRequest = prefs.getBool('doNotRequest') ?? false;
-      profileVisitor = prefs.getBool('profileVisitor') ?? true;
-      onlineStatus = prefs.getBool('onlineStatus') ?? true;
-    });
+      setState(() {
+        doNotFollowMe =
+            prefs.getBool('doNotFollowMe') ?? false;
+
+        doNotDisturb =
+            prefs.getBool('doNotDisturb') ?? false;
+
+        doNotRequest =
+            prefs.getBool('doNotRequest') ?? false;
+
+        profileVisitor =
+            prefs.getBool('profileVisitor') ?? true;
+
+        onlineStatus =
+            prefs.getBool('onlineStatus') ?? true;
+
+        isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to load privacy settings.'),
+        ),
+      );
+    }
   }
 
   Future<void> _savePrivacySetting(
-  String key,
-  bool value,
-) async {
-  final prefs = await SharedPreferences.getInstance();
+    String key,
+    bool value,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-  await prefs.setBool(key, value);
+      final saved = await prefs.setBool(key, value);
 
-  final checkPrefs = await SharedPreferences.getInstance();
-  final savedValue = checkPrefs.getBool(key);
+      await prefs.reload();
 
-  if (savedValue != value && mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Privacy setting could not be saved. Please try again.',
+      final savedValue = prefs.getBool(key);
+
+      if (!mounted) return;
+
+      if (!saved || savedValue != value) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Could not save setting. Please try again.',
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to save privacy setting.'),
         ),
-      ),
-    );
+      );
+    }
   }
-}
-    Widget privacyOption({
+
+  Future<void> _changeSetting(
+    String key,
+    bool value,
+  ) async {
+    if (isLoading) return;
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final previousValue = prefs.getBool(key);
+
+    setState(() {
+      switch (key) {
+        case 'doNotFollowMe':
+          doNotFollowMe = value;
+          break;
+        case 'doNotDisturb':
+          doNotDisturb = value;
+          break;
+        case 'doNotRequest':
+          doNotRequest = value;
+          break;
+        case 'profileVisitor':
+          profileVisitor = value;
+          break;
+        case 'onlineStatus':
+          onlineStatus = value;
+          break;
+      }
+    });
+
+    await _savePrivacySetting(key, value);
+
+    await prefs.reload();
+
+    if (!mounted) return;
+
+    final currentValue = prefs.getBool(key);
+
+    if (currentValue != value) {
+      setState(() {
+        switch (key) {
+          case 'doNotFollowMe':
+            doNotFollowMe = previousValue ?? false;
+            break;
+          case 'doNotDisturb':
+            doNotDisturb = previousValue ?? false;
+            break;
+          case 'doNotRequest':
+            doNotRequest = previousValue ?? false;
+            break;
+          case 'profileVisitor':
+            profileVisitor = previousValue ?? true;
+            break;
+          case 'onlineStatus':
+            onlineStatus = previousValue ?? true;
+            break;
+        }
+      });
+    }
+  }
+
+  Widget privacyOption({
     required String title,
     required String description,
     required bool value,
-    required ValueChanged<bool> onChanged,
+    required String keyName,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -487,7 +589,12 @@ class _PrivacyPageState extends State<PrivacyPage> {
           ),
           const SizedBox(width: 10),
           GestureDetector(
-            onTap: () => onChanged(!value),
+            onTap: isLoading
+                ? null
+                : () => _changeSetting(
+                      keyName,
+                      !value,
+                    ),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               width: 88,
@@ -507,7 +614,7 @@ class _PrivacyPageState extends State<PrivacyPage> {
                     ? MainAxisAlignment.end
                     : MainAxisAlignment.start,
                 children: [
-                  if (!value) ...[
+                  if (!value)
                     const Expanded(
                       child: Center(
                         child: Text(
@@ -520,7 +627,6 @@ class _PrivacyPageState extends State<PrivacyPage> {
                         ),
                       ),
                     ),
-                  ],
                   Container(
                     width: 28,
                     height: 28,
@@ -536,7 +642,7 @@ class _PrivacyPageState extends State<PrivacyPage> {
                           : Colors.red,
                     ),
                   ),
-                  if (value) ...[
+                  if (value)
                     const Expanded(
                       child: Center(
                         child: Text(
@@ -549,7 +655,6 @@ class _PrivacyPageState extends State<PrivacyPage> {
                         ),
                       ),
                     ),
-                  ],
                 ],
               ),
             ),
@@ -564,92 +669,72 @@ class _PrivacyPageState extends State<PrivacyPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-  backgroundColor: Colors.white,
-  elevation: 0,
-  leadingWidth: 64,
-  leading: IconButton(
-    icon: const Icon(
-      Icons.arrow_back,
-      size: 32,
-      color: Colors.black,
-    ),
-    onPressed: () {
-      Navigator.pop(context);
-    },
-  ),
-  title: const Text(
-    '🔒 Privacy',
-    style: TextStyle(
-      color: Colors.black,
-      fontSize: 22,
-      fontWeight: FontWeight.bold,
-    ),
-  ),
-),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          privacyOption(
-            title: 'Do Not Follow Me',
-            description: 'Control whether friends can enter your room.',
-            value: doNotFollowMe,
-            onChanged: (value) async {
-  setState(() => doNotFollowMe = value);
-  await _savePrivacySetting('doNotFollowMe', value);
-},
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leadingWidth: 64,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            size: 32,
+            color: Colors.black,
           ),
-
-          
-          privacyOption(
-            title: 'Do Not Disturb',
-            description: 'Control visibility of your game status.',
-            value: doNotDisturb,
-            onChanged: (value) async {
-  setState(() => doNotDisturb = value);
-  await _savePrivacySetting('doNotDisturb', value);
-},
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: const Text(
+          '🔒 Privacy',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
           ),
-
-          
-          privacyOption(
-            title: 'Do Not Request',
-            description: 'Control whether others can send you requests.',
-            value: doNotRequest,
-            onChanged: (value) async {
-  setState(() => doNotRequest = value);
-  await _savePrivacySetting('doNotRequest', value);
-},
-          ),
-
-          
-          privacyOption(
-            title: 'Profile Visitor',
-            description: 'Allow others to open your profile.',
-            value: profileVisitor,
-            onChanged: (value) async {
-  setState(() => profileVisitor = value);
-  await _savePrivacySetting('profileVisitor', value);
-},
-          ),
-
-
-
-          
-          privacyOption(
-            title: 'Online Status',
-            description: 'Control the online indicator shown to friends.',
-            value: onlineStatus,
-            onChanged: (value) async {
-  setState(() => onlineStatus = value);
-  await _savePrivacySetting('onlineStatus', value);
-},
-          ),
-        ],
+        ),
       ),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                privacyOption(
+                  title: 'Do Not Follow Me',
+                  description:
+                      'Control whether friends can enter your room.',
+                  value: doNotFollowMe,
+                  keyName: 'doNotFollowMe',
+                ),
+                privacyOption(
+                  title: 'Do Not Disturb',
+                  description:
+                      'Control visibility of your game status.',
+                  value: doNotDisturb,
+                  keyName: 'doNotDisturb',
+                ),
+                privacyOption(
+                  title: 'Do Not Request',
+                  description:
+                      'Control whether others can send you requests.',
+                  value: doNotRequest,
+                  keyName: 'doNotRequest',
+                ),
+                privacyOption(
+                  title: 'Profile Visitor',
+                  description:
+                      'Allow others to open your profile.',
+                  value: profileVisitor,
+                  keyName: 'profileVisitor',
+                ),
+                privacyOption(
+                  title: 'Online Status',
+                  description:
+                      'Control the online indicator shown to friends.',
+                  value: onlineStatus,
+                  keyName: 'onlineStatus',
+                ),
+              ],
+            ),
     );
   }
 }
-
-
-
-
