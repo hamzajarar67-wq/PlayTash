@@ -434,7 +434,7 @@ class _PrivacyPageState extends State<PrivacyPage> {
       ),
     );
   }
-    
+}
     Widget privacyOption({
     required String title,
     required String description,
