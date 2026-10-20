@@ -41,6 +41,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int page = 0;
+    int selectedRoomTab = 0;
 
   final titles = [
     'Home',
@@ -194,47 +195,148 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
+    int selectedRoomTab = 0;
+
   Widget roomPage() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        TextField(
-          decoration: InputDecoration(
-            hintText: 'Search room name or 6-digit ID',
-            prefixIcon: const Icon(Icons.search, color: gold),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: gold),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
+    final roomTabs = [
+      'All Room',
+      'Popular Room',
+      'My Room',
+    ];
+
+    final allRooms = [
+      {'name': 'Ali', 'id': '100001', 'popular': true, 'mine': false},
+      {'name': 'Hamza', 'id': '100002', 'popular': true, 'mine': true},
+      {'name': 'Bilal', 'id': '100003', 'popular': false, 'mine': false},
+      {'name': 'Umar', 'id': '100004', 'popular': true, 'mine': false},
+    ];
+
+    final filteredRooms = allRooms.where((room) {
+      if (selectedRoomTab == 1) return room['popular'] == true;
+      if (selectedRoomTab == 2) return room['mine'] == true;
+      return true;
+    }).toList();
+
+    return StatefulBuilder(
+      builder: (context, setRoomState) {
+        return Column(
           children: [
-            for (final item in [
-              'All Room',
-              'Popular Room',
-              'My Room',
-            ])
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 5),
-                  child: OutlinedButton(
-                    onPressed: () {},
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.black,
-                      side: const BorderSide(color: gold),
-                    ),
-                    child: Text(
-                      item,
-                      textAlign: TextAlign.center,
-                    ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search room name or 6-digit ID',
+                  prefixIcon: const Icon(Icons.search, color: gold),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: gold),
                   ),
                 ),
               ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: List.generate(roomTabs.length, (index) {
+                  final isSelected = selectedRoomTab == index;
+
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: SizedBox(
+                        height: 44,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setRoomState(() {
+                              selectedRoomTab = index;
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                isSelected ? Colors.black : Colors.white,
+                            foregroundColor:
+                                isSelected ? Colors.white : Colors.black,
+                            elevation: 0,
+                            padding: EdgeInsets.zero,
+                            side: const BorderSide(color: gold),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              roomTabs[index],
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            Expanded(
+              child: GridView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: filteredRooms.length,
+                gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.15,
+                ),
+                itemBuilder: (context, index) {
+                  final room = filteredRooms[index];
+
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: gold, width: 1.5),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.meeting_room_outlined,
+                          size: 38,
+                          color: gold,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          room['name'] as String,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          'ID: ${room['id']}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 
