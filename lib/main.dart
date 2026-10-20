@@ -1,11 +1,198 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() {
   runApp(const PlayTashApp());
 }
 
 const gold = Color(0xFFD4AF37);
+
+
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  bool isLogin = true;
+  bool loading = false;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> submitEmailPassword() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email aur password likho')),
+      );
+      return;
+    }
+
+    setState(() => loading = true);
+
+    try {
+      if (isLogin) {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      } else {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      }
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainPage()),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? 'Login failed')),
+      );
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+  Widget inputField(
+    String label,
+    TextEditingController controller, {
+    bool obscure = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: TextField(
+        controller: controller,
+        obscureText: obscure,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Icon(Icons.sports_esports, size: 70, color: gold),
+                const SizedBox(height: 12),
+                const Text(
+                  'PlayTash',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                Text(
+                  isLogin ? 'Login' : 'Create New Account',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                if (!isLogin)
+                  inputField('User Name', TextEditingController()),
+                inputField('Email', emailController),
+                inputField('Password', passwordController, obscure: true),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: loading ? null : submitEmailPassword,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(50),
+                  ),
+                  child: Text(
+                    loading
+                        ? 'Please wait...'
+                        : isLogin
+                            ? 'Login'
+                            : 'Sign Up',
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => setState(() => isLogin = !isLogin),
+                  child: Text(
+                    isLogin
+                        ? 'Create New Account / Sign Up'
+                        : 'Already have an account? Login',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Divider(),
+                const SizedBox(height: 12),
+                socialButton(
+                  Icons.phone_android,
+                  'Continue with Mobile OTP',
+                ),
+                const SizedBox(height: 10),
+                socialButton(Icons.g_mobiledata, 'Continue with Google'),
+                const SizedBox(height: 10),
+                socialButton(Icons.facebook, 'Continue with Facebook'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget socialButton(IconData icon, String label) {
+    return OutlinedButton.icon(
+      onPressed: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Ye option baad mein activate hoga'),
+          ),
+        );
+      },
+      icon: Icon(icon, color: Colors.black),
+      label: Text(label, style: const TextStyle(color: Colors.black)),
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(48),
+        side: const BorderSide(color: Colors.black),
+      ),
+    );
+  }
+}
+
+
+
+
 
 class PlayTashApp extends StatelessWidget {
   const PlayTashApp({super.key});
@@ -27,10 +214,15 @@ class PlayTashApp extends StatelessWidget {
           elevation: 0,
         ),
       ),
-      home: const MainPage(),
+      home: const LoginPage(),
     );
   }
 }
+
+
+
+
+
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -41,6 +233,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int page = 0;
+  final User? currentUser = FirebaseAuth.instance.currentUser;
 
   final titles = [
     'Home',
