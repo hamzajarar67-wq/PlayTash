@@ -351,7 +351,6 @@ class _MainPageState extends State<MainPage> {
       for (final item in [
         'Privacy',
         'Account',
-        'Language',
         'Help Center',
         'Personal Info',
         'Log Out',
@@ -363,7 +362,9 @@ class _MainPageState extends State<MainPage> {
               ? Icons.lock_outline
               : item == 'Account'
                   ? Icons.manage_accounts_outlined
-                  : Icons.settings_outlined,
+                  : item == 'Help Center'
+                      ? Icons.help_outline
+                      : Icons.settings_outlined,
           onTap: item == 'Privacy'
               ? () {
                   Navigator.push(
@@ -382,11 +383,19 @@ class _MainPageState extends State<MainPage> {
                         ),
                       );
                     }
-                  : null,
+                  : item == 'Help Center'
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HelpCenterPage(),
+                            ),
+                          );
+                        }
+                      : null,
         ),
-      ],
+    ],
   );
-}
 }
 
 class PrivacyPage extends StatefulWidget {
@@ -988,4 +997,428 @@ class AccountInformationPage extends StatelessWidget {
   }
 }
 
+// ================= HELP CENTER =================
 
+const Color helpGold = Color(0xFFD4AF37);
+
+class HelpCenterPage extends StatelessWidget {
+  const HelpCenterPage({super.key});
+
+  static const Map<String, List<String>> categories = {
+    'FAQ': [
+      'Account Creation FAQs',
+      'Coins Purchase FAQs',
+      'Gifts FAQs',
+      'Rooms & Voice Chat FAQs',
+      'Games FAQs',
+      'Profile & UID FAQs',
+    ],
+    'Coins Help Center': [
+      'How to Purchase Coins',
+      'Payment Methods',
+      'Purchase Failed',
+      'Coins Not Received',
+      'Purchase History',
+      'Refund Policy',
+      'Purchase FAQs',
+    ],
+    'Room Help Center': [
+      'How to Join a Room',
+      'How to Create a Room',
+      'Microphone Not Working',
+      'Voice Chat Problems',
+      'Room Owner & Admin Help',
+    ],
+    'Game Help Center': [
+      'How to Play Games',
+      'Game Rules',
+      'Game Not Opening',
+      'Game Problems & Errors',
+    ],
+    'Account & Profile': [
+      'Login Problems',
+      'Forgot Password',
+      'Change Username',
+      'Profile Photo Problems',
+      'UID Help',
+      'Account Security',
+    ],
+    'Safety & Report': [
+      'Report a User',
+      'Harassment or Abuse Report',
+      'Block a User',
+      'Report a Fake Account',
+      'Community Guidelines',
+    ],
+    'Contact Support': [
+      'Contact Support',
+      'Report a Technical Problem',
+      'Submit a Purchase Complaint',
+      'Check Support Request',
+    ],
+    'Policies & Information': [
+      'Terms of Service',
+      'Privacy Policy',
+      'Refund Policy',
+      'Community Guidelines',
+      'About PlayTash',
+      'App Version',
+    ],
+    'Report Problem': [
+      'App Not Working',
+      'Login Error',
+      'Coins Purchase Problem',
+      'Room Problem',
+      'Game Problem',
+      'Other Problems',
+    ],
+  };
+
+  static const List<IconData> categoryIcons = [
+    Icons.quiz_outlined,
+    Icons.monetization_on_outlined,
+    Icons.meeting_room_outlined,
+    Icons.sports_esports_outlined,
+    Icons.person_outline,
+    Icons.shield_outlined,
+    Icons.support_agent,
+    Icons.policy_outlined,
+    Icons.report_problem_outlined,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final names = categories.keys.toList();
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        title: const Text(
+          'Help Center',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: helpGold, width: 1.5),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: const Column(
+              children: [
+                Icon(
+                  Icons.support_agent,
+                  size: 48,
+                  color: helpGold,
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'How can we help you?',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 6),
+                Text(
+                  'Select a category to find help.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.black54),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+          for (int i = 0; i < names.length; i++)
+            _HelpCard(
+              title: names[i],
+              icon: categoryIcons[i],
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => HelpCategoryPage(
+                      title: names[i],
+                      topics: categories[names[i]]!,
+                    ),
+                  ),
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ================ CATEGORY PAGE =================
+
+class HelpCategoryPage extends StatelessWidget {
+  final String title;
+  final List<String> topics;
+
+  const HelpCategoryPage({
+    super.key,
+    required this.title,
+    required this.topics,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.black,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Choose a topic below.',
+            style: TextStyle(color: Colors.black54),
+          ),
+          const SizedBox(height: 16),
+          for (final topic in topics)
+            _HelpCard(
+              title: topic,
+              icon: Icons.article_outlined,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => HelpTopicPage(title: topic),
+                  ),
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ================= TOPIC PAGE ===================
+
+class HelpTopicPage extends StatelessWidget {
+  final String title;
+
+  const HelpTopicPage({
+    super.key,
+    required this.title,
+  });
+
+  String get description {
+    if (title.contains('Coin') ||
+        title.contains('Purchase') ||
+        title.contains('Payment') ||
+        title.contains('Refund')) {
+      return 'Yahan coins aur purchases se related maloomat di jayegi. '
+          'Agar payment ya coins ka masla ho, to apni purchase details '
+          'tayyar rakhein. Support functionality baad mein connect hogi.';
+    }
+
+    if (title.contains('Room') ||
+        title.contains('Microphone') ||
+        title.contains('Voice Chat')) {
+      return 'Room aur voice chat ke masail ke liye apna internet '
+          'connection aur microphone permission check karein. '
+          'Mazeed room support options baad mein add honge.';
+    }
+
+    if (title.contains('Game')) {
+      return 'Game se related maslay ke liye internet connection '
+          'check karein aur app ko dobara khol kar dekhein. '
+          'Mazeed game help details baad mein add hongi.';
+    }
+
+    if (title.contains('Login') ||
+        title.contains('Account') ||
+        title.contains('Password') ||
+        title.contains('Username') ||
+        title.contains('Profile') ||
+        title.contains('UID')) {
+      return 'Account aur profile se related madad ke liye '
+          'apni account information tayyar rakhein. '
+          'Account support ki functionality baad mein connect hogi.';
+    }
+
+    if (title.contains('Report') ||
+        title.contains('Problem') ||
+        title.contains('Error')) {
+      return 'Apne maslay ki tafseel note karein. '
+          'Report submit karne aur support se rabta karne ka '
+          'system baad mein connect kiya jayega.';
+    }
+
+    if (title.contains('Policy') ||
+        title.contains('Terms') ||
+        title.contains('Guidelines') ||
+        title.contains('About') ||
+        title.contains('Version')) {
+      return 'Is page par PlayTash ki mutaliqa information '
+          'di jayegi. Asal policy aur app details baad mein '
+          'add ki jayengi.';
+    }
+
+    if (title.contains('Block') ||
+        title.contains('Safety') ||
+        title.contains('Abuse') ||
+        title.contains('Fake')) {
+      return 'Safety se related maslay ko sanjeedgi se lein. '
+          'Report aur block karne ki functionality baad mein '
+          'connect ki jayegi.';
+    }
+
+    return 'Yahan "$title" se related tafseeli madad di jayegi. '
+        'Yeh abhi design ka hissa hai. Asal help aur support '
+        'functionality baad mein connect ki jayegi.';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(22),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: helpGold, width: 1.5),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.help_outline,
+                  size: 42,
+                  color: helpGold,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontSize: 16,
+                    height: 1.6,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'PlayTash Help Center',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.black54,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ================= REUSABLE CARD =================
+
+class _HelpCard extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _HelpCard({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: helpGold, width: 1.3),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 5,
+        ),
+        leading: Icon(icon, color: helpGold, size: 27),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        trailing: const Icon(
+          Icons.arrow_forward_ios,
+          color: helpGold,
+          size: 17,
+        ),
+        onTap: onTap,
+      ),
+    );
+  }
+}
