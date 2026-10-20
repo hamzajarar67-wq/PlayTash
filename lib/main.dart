@@ -384,10 +384,10 @@ class _MainPageState extends State<MainPage> {
                     }
                   : null,
         ),
-    ],
+      ],
   );
 }
-
+}
 
 class PrivacyPage extends StatefulWidget {
   const PrivacyPage({super.key});
