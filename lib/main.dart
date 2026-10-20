@@ -345,37 +345,47 @@ class _MainPageState extends State<MainPage> {
   }
 
   Widget settingPage() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        for (final item in [
-          'Privacy',
-          'Account',
-          'Language',
-          'Help Center',
-          'Personal Info',
-          'Log Out',
-          'Delete Account',
-        ])
-         box(
-  item,
-  icon: item == 'Privacy'
-      ? Icons.lock_outline
-      : Icons.settings_outlined,
-  onTap: item == 'Privacy'
-      ? () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const PrivacyPage(),
-            ),
-          );
-        }
-      : null,
-),
-      ],
-    );
-  }
+  return ListView(
+    padding: const EdgeInsets.all(16),
+    children: [
+      for (final item in [
+        'Privacy',
+        'Account',
+        'Language',
+        'Help Center',
+        'Personal Info',
+        'Log Out',
+        'Delete Account',
+      ])
+        box(
+          item,
+          icon: item == 'Privacy'
+              ? Icons.lock_outline
+              : item == 'Account'
+                  ? Icons.manage_accounts_outlined
+                  : Icons.settings_outlined,
+          onTap: item == 'Privacy'
+              ? () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PrivacyPage(),
+                    ),
+                  );
+                }
+              : item == 'Account'
+                  ? () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AccountPage(),
+                        ),
+                      );
+                    }
+                  : null,
+        ),
+    ],
+  );
 }
 
 
