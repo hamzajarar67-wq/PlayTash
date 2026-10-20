@@ -41,7 +41,6 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int page = 0;
-    int selectedRoomTab = 0;
 
   final titles = [
     'Home',
