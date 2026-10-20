@@ -402,44 +402,45 @@ class _PrivacyPageState extends State<PrivacyPage> {
   }
 
   Future<void> _loadPrivacySettings() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.reload();
+  try {
+    final prefs = await SharedPreferences.getInstance();
 
-      if (!mounted) return;
+    if (!mounted) return;
 
-      setState(() {
-        doNotFollowMe =
-            prefs.getBool('doNotFollowMe') ?? false;
+    setState(() {
+      doNotFollowMe =
+          prefs.getBool('doNotFollowMe') ?? false;
 
-        doNotDisturb =
-            prefs.getBool('doNotDisturb') ?? false;
+      doNotDisturb =
+          prefs.getBool('doNotDisturb') ?? false;
 
-        doNotRequest =
-            prefs.getBool('doNotRequest') ?? false;
+      doNotRequest =
+          prefs.getBool('doNotRequest') ?? false;
 
-        profileVisitor =
-            prefs.getBool('profileVisitor') ?? true;
+      profileVisitor =
+          prefs.getBool('profileVisitor') ?? true;
 
-        onlineStatus =
-            prefs.getBool('onlineStatus') ?? true;
+      onlineStatus =
+          prefs.getBool('onlineStatus') ?? true;
 
-        isLoading = false;
-      });
-    } catch (_) {
-      if (!mounted) return;
+      isLoading = false;
+    });
+  } catch (e) {
+    debugPrint('Privacy loading error: $e');
 
-      setState(() {
-        isLoading = false;
-      });
+    if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to load privacy settings.'),
-        ),
-      );
-    }
+    setState(() {
+      isLoading = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Privacy error: $e'),
+      ),
+    );
   }
+}
 
   Future<void> _savePrivacySetting(
     String key,
