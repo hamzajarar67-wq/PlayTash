@@ -394,8 +394,9 @@ class _MainPageState extends State<MainPage> {
                         }
                       : null,
         ),
-    ],
+     ],
   );
+}
 }
 
 class PrivacyPage extends StatefulWidget {
