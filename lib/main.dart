@@ -352,7 +352,6 @@ class _MainPageState extends State<MainPage> {
         'Privacy',
         'Account',
         'Help Center',
-        'Personal Info',
         'Log Out',
         'Delete Account',
       ])
