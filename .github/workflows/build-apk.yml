@@ -19,9 +19,9 @@ jobs:
         with:
           channel: stable
           cache: false
-
+          
       - name: Create Android project
-        run: flutter create --platforms=android .
+        run: flutter create --platforms=android --org com.playtash .
 
       - name: Setup Firebase config
         run: |
