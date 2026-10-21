@@ -28,6 +28,44 @@ jobs:
           mkdir -p android/app
           cp "google-services (1).json" android/app/google-services.json
 
+      - name: Configure Firebase Gradle
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          settings = Path("android/settings.gradle.kts")
+          app = Path("android/app/build.gradle.kts")
+
+          if not settings.exists() or not app.exists():
+              settings = Path("android/settings.gradle")
+              app = Path("android/app/build.gradle")
+
+          if not settings.exists() or not app.exists():
+              raise SystemExit("Android Gradle files nahi milin.")
+
+          s = settings.read_text()
+          a = app.read_text()
+
+          if settings.suffix == ".kts":
+              plugin = 'id("com.google.gms.google-services") version "4.4.4" apply false'
+          else:
+              plugin = "id 'com.google.gms.google-services' version '4.4.4' apply false"
+
+          if app.suffix == ".kts":
+              apply = 'id("com.google.gms.google-services")'
+          else:
+              apply = "id 'com.google.gms.google-services'"
+
+          if "com.google.gms.google-services" not in s:
+              s = s.replace("plugins {", "plugins {\n    " + plugin, 1)
+
+          if "com.google.gms.google-services" not in a:
+              a = a.replace("plugins {", "plugins {\n    " + apply, 1)
+
+          settings.write_text(s)
+          app.write_text(a)
+          PY
+
       - name: Clean project
         run: flutter clean
 
