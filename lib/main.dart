@@ -23,6 +23,7 @@ class _LoginPageState extends State<LoginPage> {
 
   bool isLogin = true;
   bool loading = false;
+  bool showPassword = false;
 
   @override
   void dispose() {
@@ -83,9 +84,23 @@ class _LoginPageState extends State<LoginPage> {
       padding: const EdgeInsets.only(bottom: 14),
       child: TextField(
         controller: controller,
-        obscureText: obscure,
-        decoration: InputDecoration(
-          labelText: label,
+        obscureText: obscure && !showPassword,
+decoration: InputDecoration(
+  labelText: label,
+  suffixIcon: obscure
+      ? IconButton(
+          icon: Icon(
+            showPassword
+                ? Icons.visibility_off
+                : Icons.visibility,
+          ),
+          onPressed: () {
+            setState(() {
+              showPassword = !showPassword;
+            });
+          },
+        )
+      : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
           ),
