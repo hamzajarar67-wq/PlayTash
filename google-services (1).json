@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "156388126390",
+    "project_id": "playtash-843e7",
+    "storage_bucket": "playtash-843e7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:156388126390:android:39d647bc98348b64a6c017",
+        "android_client_info": {
+          "package_name": "com.playtash.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClfIQHumr3hrI_zweBNLVxrfHcrajJ3vc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
