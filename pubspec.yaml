@@ -12,6 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.5.3
   firebase_auth: ^6.0.0
+  firebase_core: ^4.0.0
 
 dependency_overrides:
   shared_preferences_android: 2.4.28
